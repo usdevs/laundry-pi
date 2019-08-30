@@ -88,10 +88,10 @@ totalCycleTimeWashing = 1800
 totalCycleTimeDryer = 2700
 
 while True:
-    
+
     # ping the pi
     doc_ref.set({
-        "pi_1_last_seen" : time.time()
+        "pi_1_last_seen" : time.strftime('%x %X'),
     }, merge=True)
 
     for machineNumber in machineDict:
@@ -119,8 +119,8 @@ while True:
             "machine" + str(machineNumber):machineStatusDict[machineNumber],
             "machine" + str(machineNumber) + "TimeRemaining":machineTimeRemaining
         },merge=True)
-        
+
         time.sleep(0.1)
-    
+
 #LDR resistance decreases with increasing light intensity
 #light on > lower ADC values
