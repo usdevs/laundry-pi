@@ -1,9 +1,13 @@
 import asyncio
 import time
-
+import board
+import busio
 import firebase_admin
+import time
 from firebase_admin import credentials
 from firebase_admin import firestore
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 
 FIREBASE_CERT = './usc-laundry-test-firebase-adminsdk-0sph5-01054b85e5.json'
 FIREBASE_COLLECTION = 'test_collection'
