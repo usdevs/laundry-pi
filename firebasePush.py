@@ -42,9 +42,9 @@ machineTypeDict = {
 }
 
 machineConnectedDict = {
-    1 : True,
+    1 : False,
     2 : True,
-    3 : False,
+    3 : True,
     4 : False,
     5 : True,
     6 : True,
