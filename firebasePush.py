@@ -67,16 +67,16 @@ class ADS1x15:
         lightness = AnalogIn(self.ads, ADS.P0).value
         return lightness < THRESHHOLD
 
-if __name__ == '__main__':
-
+async def main():
     # Initialize firebase
     fb = FirebaseManager(CERT_PATH, interval=0.5)
 
     """
-    THIS IS A HACK
-    - Scheduled on CRON every minute
-    - source in /home/pi/laundroAY1920/ip-patch.py
-
+    HACK START
+    - Ratchet way to debug IP from the Pi
+    - Alternatively, schedule ip-patch.py on CRON
+    - source at /home/pi/laundroAY1920/ip-patch.py
+    ---
     import socket
 
     try:
@@ -92,7 +92,7 @@ if __name__ == '__main__':
                 fb.doc.set(HACK_update, merge=True)
     except:
         print('IP hack failed ):')
-
+    ---
     HACK END
     """
 
@@ -109,12 +109,14 @@ if __name__ == '__main__':
     # Wrap ADCs in an interface before passing to firebase Object
     fb.machines.extend(LaundryMachine(sensor=ADS1x15(input)) for input in ads_inputs)
 
-    # Run the async event loop and hope for the best!
+    # Hope for the best!
+    await fb.run())
+
+if __name__ == '__main__':
     try:
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(fb.run())
+        loop.run_until_complete(main())
 
     except Exception as e:
-        loop.stop()
+        print('Oops something went wrong!')
         print(e)
-        input()
