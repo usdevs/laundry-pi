@@ -87,6 +87,10 @@ generalThresholdValue = 32000
 totalCycleTimeWashing = 1800
 totalCycleTimeDryer = 2700
 
+# sends the Pi's IP address to the firebase server
+# import ip_patch
+# ip_patch.run()
+
 while True:
 
     # ping the pi
