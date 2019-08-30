@@ -26,40 +26,38 @@ class FirebaseManager:
         doc = db.collection(FIREBASE_COLLECTION).document(FIREBASE_DOCUMENT)
         return doc
 
-    def add_machine(self, machine):
-        self.machines.append(machine)
-
     def run(self):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.main())
 
-    async def push(self, data):
-        self.db.set(data, merge=True)
+    async def push_status_update(self, machine):
+        status = await machine.status()
+        if status:
+            self.db.set(status, merge=True)
 
     async def main(self):
         while True:
-            status = list()
-            await asyncio.gather(*(machine.write_status(status) for machine in self.machines))
-            await asyncio.gather(*(self.push(data) for data in status))
-            await asyncio.sleep(self.interval)
+            tasks = [self.push_status_update(machine) for machine in self.machines]
+            done, pending = await asyncio.wait(tasks, timeout=self.interval)
+            for task in pending:
+                print('failed to push!')
+                task.cancel()
 
 class LaundryMachine:
     def __init__(self, name, sensor):
         self.name = name
         self.running = None
 
-    async def write_status(self, record):
+    async def status(self, record):
+        results = dict()
         running = await self.sensor.status()
         if running != self.running:
-            self.running = running
-            record.append({
+            results.update({
                 f'{self.name}_running': self.running,
                 f'{self.name}_time': time.time(),
             })
-
-    async def update_status(self):
-        """Update self.running and self.start_time"""
-        raise NotImplementedError('Machine should be subclassed')
+            self.running = running
+        return results
 
 class ADS1x15:
     def __init__(self, ads):
@@ -70,8 +68,33 @@ class ADS1x15:
         return lightness < THRESHHOLD
 
 if __name__ == '__main__':
+
     # Initialize firebase
     fb = FirebaseManager(CERT_PATH, interval=0.5)
+
+    """
+    THIS IS A HACK
+    - Scheduled on CRON every minute
+    - source in /home/pi/laundroAY1920/ip-patch.py
+
+    import socket
+
+    try:
+        print('trying IP hack!')
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8",80))
+            ip_address = s.getsockname()[0]
+            if ip_address != '127.0.0.1':
+                HACK_update = {
+                    'HACK timestamp': time.strftime('%x %X'),
+                    'HACK ipaddress': ip_address,
+                }
+                fb.doc.set(HACK_update, merge=True)
+    except:
+        print('IP hack failed ):')
+
+    HACK END
+    """
 
     # Create the I2C bus
     i2c = busio.I2C(board.SCL, board.SDA)
@@ -84,10 +107,9 @@ if __name__ == '__main__':
     ]
 
     # Wrap ADCs in an interface before passing to firebase Object
-    machines = [LaundryMachine(ADS1x15(input)) for input in ads_inputs]
-    for machine in machines:
-        fb.add_machine(machine)
+    fb.machines.extend(LaundryMachine(sensor=ADS1x15(input)) for input in ads_inputs)
 
+    # Run the async event loop and hope for the best!
     try:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(fb.run())
