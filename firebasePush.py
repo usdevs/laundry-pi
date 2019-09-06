@@ -31,10 +31,11 @@ class FirebaseManager:
         loop.run_until_complete(self.main())
 
     async def push_status_update(self, machine):
+        """Pushes a firebase update from a machine if it exists"""
         status = await machine.status()
         if status:
             self.db.set(status, merge=True)
-
+        
     async def main(self):
         while True:
             tasks = [self.push_status_update(machine) for machine in self.machines]
@@ -49,6 +50,7 @@ class LaundryMachine:
         self.running = None
 
     async def status(self, record):
+        """Returns a firebase update if the machine changes states"""
         results = dict()
         running = await self.sensor.status()
         if running != self.running:
@@ -59,12 +61,10 @@ class LaundryMachine:
             self.running = running
         return results
 
-class ADS1x15:
-    def __init__(self, ads):
-        self.ads = ads
-
+class SensorADS1115(ADS.ADS1115):
     async def status(self):
-        lightness = AnalogIn(self.ads, ADS.P0).value
+        """Returns if door lock light is on"""
+        lightness = AnalogIn(self, ADS.P0).value
         return lightness < THRESHHOLD
 
 async def main():
@@ -100,14 +100,17 @@ async def main():
     i2c = busio.I2C(board.SCL, board.SDA)
 
     # Create ADC object using I2C bus
-    ads_inputs = [
-        ADS.ADS1115(i2c, address=0x49),
-        ADS.ADS1115(i2c, address=0x48),
-        ADS.ADS1115(i2c, address=0x4a),
-    ]
+    ads_input = {
+        'name1': SensorADS1115(i2c, address=0x49)),
+        'name2': SensorADS1115(i2c, address=0x48)),
+        'name3': SensorADS1115(i2c, address=0x4a)),
+    }
 
-    # Wrap ADCs in an interface before passing to firebase Object
-    fb.machines.extend(LaundryMachine(sensor=ADS1x15(input)) for input in ads_inputs)
+    # Passes ADCs to firebase Object (I resist the one liner)
+    # fb.machines.extend(LaundryMachine(*input) for input in ads_input.items())
+    for name, sensor in ads_input.items():
+        machine = LaundryMachine(name, sensor)
+        fb.machines.append(machine)
 
     # Hope for the best!
     await fb.run())
