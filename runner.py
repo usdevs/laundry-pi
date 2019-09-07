@@ -5,7 +5,6 @@ import time
 
 class ReloadableModule:
     def __init__(self, name):
-        name = name.replace('.py', '')
         self.module = importlib.import_module(name, package='laundry-pi')
 
     def reload(self):
@@ -41,7 +40,56 @@ def main():
         print('Invalid arguments! use python3 runner.py [module path] [function name]')
         return
 
+    module_name = module_name.replace('.py', '')
     run_with_updates(module_name, method_name, update_interval=5)
+
+def test():
+    import time
+    from flagger import Flag
+
+    timeout = 30
+    flag = Flag('.flag')
+
+    ##### Add stuff here to test #####
+
+
+
+
+
+    ##################################
+
+    for t in range(timeout):
+        if flag: break
+        print(f'waiting for {t}s...')
+        ##### Add stuff here to test #####
+        if t > 3:
+            flag.set()
+            print(f'flag.test() set the flag after {t}s!')
+
+
+        ##################################
+        time.sleep(1)
+
+    else:
+        print(f'reloading: timeout after {timeout}s')
+        ##### Add stuff here to test #####
+
+
+
+
+
+        ##################################
+        return
+
+    print('Reloading: Flag set!')
+    ##### Add stuff here to test #####
+
+
+
+
+
+    ##################################
+    flag.unflag()
 
 if __name__ == '__main__':
     main()

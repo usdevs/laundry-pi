@@ -1,6 +1,25 @@
 import sys
 from pathlib import Path
 
+class Flag:
+    def __init__(self, path):
+        self.path = Path(path)
+
+    def __bool__(self):
+        return self.flagged()
+
+    def flagged(self):
+        return self.path.is_file()
+
+    def set(self):
+        try:
+            self.path.touch()
+        except:
+            pass # flag already set
+
+    def unflag(self):
+        self.path.unlink()
+
 cwd = Path(__file__).parent
 cache = cwd / '.lastcommit'
 flag = cwd / '.flag'
