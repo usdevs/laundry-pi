@@ -18,12 +18,12 @@ and the new `function` is run in a new process.
 The intended usage is:
 `python3 runner.py firebasePush.py main`
 
-## main routine
+## Main routine
 This can be any routine that frequently checks for `.flag` and terminates once
 it is set.
 
 ## Notes
 I can't quite figure out how to robustly do dynamic imports . ^ .
 
-Runner.py currently only works when it is in the same parent directory as the
+runner.py currently only works when it is in the same parent directory as the
 main routine.
