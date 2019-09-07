@@ -24,7 +24,7 @@ and the new `function` is run in a new process.
 
 The intended usage is: `python3 runner.py firebasePush.py main`
 
-Also try `python3 runner.py runner test`! (.py isn't necessary in module path)
+Also try: `python3 runner.py runner test` (.py isn't necessary in module path)
 
 ### Main routine
 This can be any routine that frequently checks for `.flag` and terminates once
