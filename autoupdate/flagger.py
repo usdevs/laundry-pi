@@ -1,14 +1,9 @@
-"""
-    Intended use in cron file: git pull [blahblah] && git log --pretty=oneline -1 | python scripts/flagger.py
-    Sets a flag to trigger termination of main.py.
-"""
-
 import sys
 from pathlib import Path
 
 cwd = Path(__file__).parent
-cache = cwd / 'lastcommit'
-flag = cwd / 'flag'
+cache = cwd / '.lastcommit'
+flag = cwd / '.flag'
 
 def main():
     args = sys.stdin.read()
