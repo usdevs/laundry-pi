@@ -1,4 +1,3 @@
-import asyncio
 import time
 import board
 import busio
@@ -9,117 +8,123 @@ from firebase_admin import firestore
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
-FIREBASE_CERT = './usc-laundry-test-firebase-adminsdk-0sph5-01054b85e5.json'
-FIREBASE_COLLECTION = 'test_collection'
-FIREBASE_DOCUMENT = 'test_document'
-THRESHHOLD = 32000
+# Using guide from https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15
 
-class FirebaseManager:
-    def __init__(self, cert, interval=0.5):
-        self.db = self.init_database(cert)
-        self.machines = list()
+# Create the I2C bus
+i2c = busio.I2C(board.SCL, board.SDA)
 
-    def init_database(self, cert):
-        cred = credentials.Certificate(cert)
-        firebase_admin.initialize_app(cred)
-        db = firestore.client()
-        doc = db.collection(FIREBASE_COLLECTION).document(FIREBASE_DOCUMENT)
-        return doc
+# Create ADC object using I2C bus
+ads1 = ADS.ADS1115(i2c, address=0x48)
+ads2 = ADS.ADS1115(i2c, address=0x49)
+ads3 = ADS.ADS1115(i2c, address=0x4a)
+machineDict = {
+    1 : (ads1, ADS.P0),
+    2 : (ads1, ADS.P1),
+    3 : (ads1, ADS.P2),
+    4 : (ads1, ADS.P3),
+    5 : (ads2, ADS.P0),
+    6 : (ads2, ADS.P1),
+    7 : (ads2, ADS.P2),
+    8 : (ads2, ADS.P3),
+    9 : (ads3, ADS.P0)
+}
 
-    def run(self):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.main())
+machineTypeDict = {
+    1 : "dryer",
+    2 : "dryer",
+    3 : "dryer",
+    4 : "dryer",
+    5 : "washing",
+    6 : "washing",
+    7 : "washing",
+    8 : "washing",
+    9 : "washing",
+}
 
-    async def push_status_update(self, machine):
-        """Pushes a firebase update from a machine if it exists"""
-        status = await machine.status()
-        if status:
-            self.db.set(status, merge=True)
-        
-    async def main(self):
-        while True:
-            tasks = [self.push_status_update(machine) for machine in self.machines]
-            done, pending = await asyncio.wait(tasks, timeout=self.interval)
-            for task in pending:
-                print('failed to push!')
-                task.cancel()
+machineConnectedDict = {
+    1 : False,
+    2 : True,
+    3 : True,
+    4 : False,
+    5 : True,
+    6 : True,
+    7 : False,
+    8 : False,
+    9 : True,
+}
 
-class LaundryMachine:
-    def __init__(self, name, sensor):
-        self.name = name
-        self.running = None
+machineStatusDict = {
+    1 : "off",
+    2 : "off",
+    3 : "off",
+    4 : "off",
+    5 : "off",
+    6 : "off",
+    7 : "off",
+    8 : "off",
+    9 : "off",
+}
 
-    async def status(self, record):
-        """Returns a firebase update if the machine changes states"""
-        results = dict()
-        running = await self.sensor.status()
-        if running != self.running:
-            results.update({
-                f'{self.name}_running': self.running,
-                f'{self.name}_time': time.time(),
-            })
-            self.running = running
-        return results
+machineStartTimeDict = {
+    1 : 0,
+    2 : 0,
+    3 : 0,
+    4 : 0,
+    5 : 0,
+    6 : 0,
+    7 : 0,
+    8 : 0,
+    9 : 0,
+}
 
-class SensorADS1115(ADS.ADS1115):
-    async def status(self):
-        """Returns if door lock light is on"""
-        lightness = AnalogIn(self, ADS.P0).value
-        return lightness < THRESHHOLD
+cred = credentials.Certificate('./usc-laundry-test-firebase-adminsdk-0sph5-01054b85e5.json')
 
-async def main():
-    # Initialize firebase
-    fb = FirebaseManager(CERT_PATH, interval=0.5)
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+doc_ref = db.collection("test_collection").document("test_document")
 
-    """
-    HACK START
-    - Ratchet way to debug IP from the Pi
-    - Alternatively, schedule ip-patch.py on CRON
-    - source at /home/pi/laundroAY1920/ip-patch.py
-    ---
-    import socket
+generalThresholdValue = 32000
+totalCycleTimeWashing = 1800
+totalCycleTimeDryer = 2700
 
-    try:
-        print('trying IP hack!')
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(("8.8.8.8",80))
-            ip_address = s.getsockname()[0]
-            if ip_address != '127.0.0.1':
-                HACK_update = {
-                    'HACK timestamp': time.strftime('%x %X'),
-                    'HACK ipaddress': ip_address,
-                }
-                fb.doc.set(HACK_update, merge=True)
-    except:
-        print('IP hack failed ):')
-    ---
-    HACK END
-    """
+# sends the Pi's IP address to the firebase server
+# import ip_patch
+# ip_patch.run()
 
-    # Create the I2C bus
-    i2c = busio.I2C(board.SCL, board.SDA)
+while True:
 
-    # Create ADC object using I2C bus
-    ads_input = {
-        'name1': SensorADS1115(i2c, address=0x49)),
-        'name2': SensorADS1115(i2c, address=0x48)),
-        'name3': SensorADS1115(i2c, address=0x4a)),
-    }
+    # ping the pi
+    doc_ref.set({
+        "pi_1_last_seen" : time.strftime('%x %X'),
+    }, merge=True)
 
-    # Passes ADCs to firebase Object (I resist the one liner)
-    # fb.machines.extend(LaundryMachine(*input) for input in ads_input.items())
-    for name, sensor in ads_input.items():
-        machine = LaundryMachine(name, sensor)
-        fb.machines.append(machine)
+    for machineNumber in machineDict:
+        if machineConnectedDict[machineNumber] == False:
+            continue
+        lightnessValue = AnalogIn(machineDict[machineNumber][0], machineDict[machineNumber][1]).value
+        if lightnessValue < generalThresholdValue:
+            if machineStatusDict[machineNumber] == "off":
+                machineStartTimeDict[machineNumber] = time.time()
+            machineStatusDict[machineNumber] = "on"
+        else:
+            if machineStatusDict[machineNumber] == "on":
+                machineStartTimeDict[machineNumber] = 0
+            machineStatusDict[machineNumber] = "off"
+        print("pin value for machine " + str(machineNumber) + " is " + str(lightnessValue) + ", status is " + str(machineStatusDict[machineNumber]))
+        if machineStatusDict[machineNumber] == "on":
+            machineTimeElapsed = time.time() - machineStartTimeDict[machineNumber]
+            if machineTypeDict[machineNumber] == "dryer":
+                machineTimeRemaining = totalCycleTimeDryer - machineTimeElapsed
+            else:
+                machineTimeRemaining = totalCycleTimeWashing - machineTimeElapsed
+        else:
+            machineTimeRemaining = 0
+        doc_ref.set({
+            "machine" + str(machineNumber):machineStatusDict[machineNumber],
+            "machine" + str(machineNumber) + "TimeRemaining":machineTimeRemaining
+        },merge=True)
 
-    # Hope for the best!
-    await fb.run())
+        time.sleep(0.1)
 
-if __name__ == '__main__':
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
-
-    except Exception as e:
-        print('Oops something went wrong!')
-        print(e)
+#LDR resistance decreases with increasing light intensity
+#light on > lower ADC values

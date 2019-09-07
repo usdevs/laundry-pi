@@ -1,5 +1,6 @@
 """
-    Intended use in cron file: git pull blahblah && git log --pretty=oneline -1 | python scripts/flagger.py
+    Intended use in cron file: git pull [blahblah] && git log --pretty=oneline -1 | python scripts/flagger.py
+    Sets a flag to trigger termination of main.py.
 """
 
 import sys
