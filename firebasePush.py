@@ -1,16 +1,23 @@
 import time
+
 import board
 import busio
 import firebase_admin
-import time
 from firebase_admin import credentials
 from firebase_admin import firestore
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
+
 # Using guide from https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15
 
-def main():
+def main(check_updates=True):
+
+    # Create the flag for git updates
+    if check_updates:
+        from flagger import Flag
+        has_newer_commit = Flag('.flag')
+
     # Create the I2C bus
     i2c = busio.I2C(board.SCL, board.SDA)
 
@@ -94,6 +101,10 @@ def main():
 
     while True:
 
+        # Terminate on update
+        if check_updates and has_newer_commit:
+            break
+
         # ping the pi
         doc_ref.set({
             "pi_1_last_seen" : time.strftime('%x %X'),
@@ -135,7 +146,7 @@ if __name__ == '__main__':
     python3 laundry-pi/autoupdate/runner.py firebasePush.py main""")
 
     if input('Run anyway? [y/N]: ') in ('yY'):
-        print('running...')
-        main()
+        print('running in debug mode...')
+        main(check_updates=False)
     else:
         print('terminated')
