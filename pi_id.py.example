@@ -1,0 +1,7 @@
+# This file contains the ID of the Raspberry Pi.
+# The ID is used to figure out what pins to create. 
+# It also corresponds to the pi_id field in the pi_status collection in firestore, which is used to log when the pi last connected to firestore for debugging purposes.
+# On the Raspberry Pi, create a copy of this file without .example and set the PI_ID variable appropriately
+# Also modify the get_pins() function in main.py if necessary (this change should be pushed to github)
+
+PI_ID = 1
