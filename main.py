@@ -1,3 +1,4 @@
+import board
 import busio
 import adafruit_ads1x15.ads1115 as ADS
 import datetime as dt
@@ -25,11 +26,11 @@ def get_pins(pi_id):
             Pin(2, ads1, ADS.P1),
             Pin(3, ads1, ADS.P2),
             Pin(4, ads1, ADS.P3),
-            Pin(5, ads2, ADS.PO),
+            Pin(5, ads2, ADS.P0),
             Pin(6, ads2, ADS.P1),
             Pin(7, ads2, ADS.P2),
             Pin(8, ads2, ADS.P3),
-            Pin(9, ads3, ADS.PO),
+            Pin(9, ads3, ADS.P0),
             Pin(10, ads3, ADS.P1),
             Pin(11, ads3, ADS.P2),
             Pin(12, ads3, ADS.P3),
@@ -54,6 +55,7 @@ def main():
         # stops the script if a new commit has been detected
         if flag:
             flag.unflag()
+            print('Flag was set. Unsetting flag and existing main')
             break
 
         for pin in pins:
@@ -74,8 +76,11 @@ def main():
             if (now - prev_time).seconds > cycle_length and on:
                 # uh oh, we don't know when the cycle started
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=False)
-            elif on != prevOn :
+            elif on != prev_on :
                 # update firestore on/off status and timing
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=True)
             else:
                 firebase.update_pin_last_checked(pin,now)
+
+if __name__ == '__main__':
+    main()

@@ -12,8 +12,8 @@ class Pin:
         return True # TODO this properly
 
     def is_on(self):
-        light_value = AnalogIn(self.adc, self.adc_pin)
-        return light_value > self.threshold
+        light_value = AnalogIn(self.adc, self.adc_pin).value
+        return light_value < self.threshold
     
     def __str__(self):
         return f'Pin {id}'
