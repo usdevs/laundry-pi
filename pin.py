@@ -16,6 +16,6 @@ class Pin:
         return light_value < self.threshold
     
     def __str__(self):
-        return f'Pin {id}'
+        return 'Pin ' + self.id
 
     __repr__ = __str__

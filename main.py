@@ -36,7 +36,7 @@ def get_pins(pi_id):
             Pin(12, ads3, ADS.P3),
         ]
 
-    raise ValueError(f'Invalid rapsberry pi id : {pi_id}')
+    raise ValueError('Invalid rapsberry pi id : ' + str(pi_id))
 
 def main():
 

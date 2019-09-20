@@ -60,18 +60,18 @@ def test():
 
     for t in range(timeout):
         if flag: break
-        print(f'waiting for {t}s...')
+        print('waiting for' + str(t) + 's...')
         ##### Add stuff here to test #####
         if t > 3:
             flag.set()
-            print(f'flag.test() set the flag after {t}s!')
+            print('flag.test() set the flag after ' + str(t) +  's!')
 
 
         ##################################
         time.sleep(1)
 
     else:
-        print(f'reloading: timeout after {timeout}s')
+        print('reloading: timeout after ' + str(timeout) + 's')
         ##### Add stuff here to test #####
 
 
