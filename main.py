@@ -5,6 +5,7 @@ import datetime as dt
 from pin import Pin
 from firebase_manager import FirebaseManager
 from utils import sg_time_now
+import flagger as fl
 
 from pi_id import PI_ID
 
@@ -40,6 +41,7 @@ def main():
 
     firebase = FirebaseManager('./usc-laundry-test-firebase-adminsdk-0sph5-01054b85e5.json', PI_ID)
     pins = get_pins(PI_ID)
+    flag = fl.Flag(fl.flag)
 
     # create pins and pis in Firebase if they don't already exist
     firebase.init_pins(pins)
@@ -47,11 +49,16 @@ def main():
 
     # main loop
     while True:
-
         firebase.update_pi_last_seen(sg_time_now())
+
+        # stops the script if a new commit has been detected
+        if flag:
+            flag.unflag()
+            break
 
         for pin in pins:
             if not pin.is_working():
+                print(str(pin) + ' is not working')
                 continue
 
             on = pin.is_on()
