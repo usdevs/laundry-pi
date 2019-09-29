@@ -2,6 +2,7 @@ import board
 import busio
 import adafruit_ads1x15.ads1115 as ADS
 import datetime as dt
+import time
 
 from pin import Pin
 from firebase_manager import FirebaseManager
@@ -74,6 +75,8 @@ def main():
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=True)
             else:
                 firebase.update_pin_last_checked(pin,now)
+            
+        time.sleep(5)
 
 if __name__ == '__main__':
     main()
