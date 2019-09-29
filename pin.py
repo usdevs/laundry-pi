@@ -10,7 +10,7 @@ class Pin:
 
     def is_on_single(self):
         light_value = AnalogIn(self.adc, self.adc_pin).value
-        print(self.id, light_value)
+        print(str(self), light_value)
         return light_value < self.threshold
     
     def is_on(self):
