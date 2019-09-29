@@ -7,12 +7,19 @@ class Pin:
         self.adc = adc
         self.adc_pin = adc_pin
         self.threshold = threshold
-    
-    def is_on(self):
+
+    def is_on_single(self):
         light_value = AnalogIn(self.adc, self.adc_pin).value
         print(self.id, light_value)
         return light_value < self.threshold
     
+    def is_on(self):
+        """Allow blinking"""
+        for i in range(20):
+            if self.is_on_single():
+                return True
+        return False
+
     def __str__(self):
         return 'Pin ' + self.id
 
