@@ -53,7 +53,7 @@ def main():
         # stops the script if a new commit has been detected
         if flag:
             flag.unflag()
-            print('Flag was set. Unsetting flag and existing main')
+            print('Flag was set. Unsetting flag and exiting main')
             break
 
         for pin in pins:
