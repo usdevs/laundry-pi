@@ -8,9 +8,6 @@ class Pin:
         self.adc_pin = adc_pin
         self.threshold = threshold
     
-    def is_working(self):
-        return True # TODO this properly
-
     def is_on(self):
         light_value = AnalogIn(self.adc, self.adc_pin).value
         print(self.id, light_value)

@@ -56,10 +56,6 @@ def main():
             break
 
         for pin in pins:
-            if not pin.is_working():
-                print(str(pin) + ' is not working')
-                continue
-
             on = pin.is_on()
             now = sg_time_now()
 
