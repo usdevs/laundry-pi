@@ -54,7 +54,6 @@ class FirebaseManager:
             'on' : pin.is_on(),
             'timeChanged' : now,
             'timeChangedCertain' : False,
-            'lastChecked' : now
         })
 
     def create_pi(self, description = ''):
@@ -68,13 +67,8 @@ class FirebaseManager:
         FirebaseManager._update_doc(self.get_pin_doc(pin), {
             'on' : on,
             'timeChanged' : datetime,
-            'lastChecked' : datetime,
             'timeChangedCertain' : certain
         })
-
-    def update_pin_last_checked(self, pin, datetime):
-        FirebaseManager._update_doc(self.get_pin_doc(pin),
-                         {'lastChecked' : datetime})
 
     def update_pi_last_seen(self, datetime):
         FirebaseManager._update_doc(self.get_pi_doc(),

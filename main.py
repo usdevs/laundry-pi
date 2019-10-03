@@ -45,10 +45,23 @@ def main():
     # create pins and pis in Firebase if they don't already exist
     firebase.init_pins(pins)
     firebase.init_pi()
+    
+    all_prev_on = {}
+    all_prev_time = {}
+    for pin in pins:
+        pin_data = firebase.read_pin(pin)
+        all_prev_on[pin.id] = pin_data['on']
+        all_prev_time[pin.id] = pin_data['timeChanged']
+    
+    counter = 0
 
     # main loop
     while True:
-        firebase.update_pi_last_seen(sg_time_now())
+        # updates roughly every 5 min (~30 iterations per min * 5)
+        if counter % 150 == 0:
+            firebase.update_pi_last_seen(sg_time_now())
+            counter = 0
+        counter += 1
 
         # stops the script if a new commit has been detected
         if flag:
@@ -60,9 +73,8 @@ def main():
             on = pin.is_on()
             now = sg_time_now()
 
-            pin_data = firebase.read_pin(pin)
-            prev_on = pin_data['on']
-            prev_time = pin_data['timeChanged']
+            prev_on = all_prev_on[pin.id]
+            prev_time = all_prev_time[pin.id]
 
             # in seconds. this is only true for washers and tapping once for dryers
             cycle_length = 45 * 60
@@ -70,13 +82,18 @@ def main():
             if (now - prev_time).seconds > cycle_length and on:
                 # uh oh, we don't know when the cycle started
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=False)
+                prev_on = on
+                prev_time = time
             elif on != prev_on :
                 # update firestore on/off status and timing
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=True)
-            else:
-                firebase.update_pin_last_checked(pin,now)
-            
-        time.sleep(5)
+                prev_on = on
+                prev_time = now
+
+            all_prev_on[pin.id] = prev_on
+            all_prev_time[pin.id] = prev_time
+
+        time.sleep(1)
 
 if __name__ == '__main__':
     main()
