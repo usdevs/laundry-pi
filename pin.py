@@ -21,6 +21,6 @@ class Pin:
         return False
 
     def __str__(self):
-        return 'Pin ' + self.id
+        return 'Pin ' + str(self.id)
 
     __repr__ = __str__
