@@ -54,7 +54,7 @@ def main():
         all_prev_on[pin.id] = pin_data['on']
         all_prev_time[pin.id] = to_py_time(pin_data['timeChanged'])
         print(type(all_prev_time[pin.id]))
-
+       
     counter = 0
 
     # main loop
@@ -74,6 +74,7 @@ def main():
         for pin in pins:
             on = pin.is_on()
             now = sg_time_now()
+            print(type(now))
 
             prev_on = all_prev_on[pin.id]
             prev_time = all_prev_time[pin.id]
