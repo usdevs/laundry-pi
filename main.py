@@ -7,6 +7,7 @@ import time
 from pin import Pin
 from firebase_manager import FirebaseManager
 from utils import sg_time_now
+from utils import to_py_time
 import flagger as fl
 
 from pi_id import PI_ID
@@ -51,7 +52,7 @@ def main():
     for pin in pins:
         pin_data = firebase.read_pin(pin)
         all_prev_on[pin.id] = pin_data['on']
-        all_prev_time[pin.id] = pin_data['timeChanged']
+        all_prev_time[pin.id] = to_py_time(pin_data['timeChanged'])
     
     counter = 0
 
@@ -66,7 +67,7 @@ def main():
         # stops the script if a new commit has been detected
         if flag:
             flag.unflag()
-            print('Flag was set. Unsetting flag and exiting main')
+            print('Changes were detected. Restarting script...')
             break
 
         for pin in pins:
@@ -77,9 +78,9 @@ def main():
             prev_time = all_prev_time[pin.id]
 
             # in seconds. this is only true for washers and tapping once for dryers
-            cycle_length = 45 * 60
+            cycle_length = dt.timedelta(minutes=45)
 
-            if (now - prev_time).seconds > cycle_length and on:
+            if (now - prev_time) > cycle_length and on:
                 # uh oh, we don't know when the cycle started
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=False)
                 prev_on = on
