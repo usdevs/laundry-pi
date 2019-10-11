@@ -53,7 +53,7 @@ def main():
         pin_data = firebase.read_pin(pin)
         all_prev_on[pin.id] = pin_data['on']
         all_prev_time[pin.id] = to_py_time(pin_data['timeChanged'])
-        print(type(all_prev_time[pin.id]))
+        #print(type(all_prev_time[pin.id]))
        
     counter = 0
 
@@ -74,14 +74,15 @@ def main():
         for pin in pins:
             on = pin.is_on()
             now = sg_time_now()
-            print(type(now))
-
+            #print(type(now))
+           
             prev_on = all_prev_on[pin.id]
             prev_time = all_prev_time[pin.id]
 
             # in seconds. this is only true for washers and tapping once for dryers
             cycle_length = dt.timedelta(minutes=45)
 
+            print(type(now), type(prev_time))
             if (now - prev_time) > cycle_length and on:
                 # uh oh, we don't know when the cycle started
                 firebase.update_pin_on(pin, on=on, datetime=now, certain=False)
