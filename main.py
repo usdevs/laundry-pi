@@ -53,7 +53,8 @@ def main():
         pin_data = firebase.read_pin(pin)
         all_prev_on[pin.id] = pin_data['on']
         all_prev_time[pin.id] = to_py_time(pin_data['timeChanged'])
-    
+        print(type(all_prev_time[pin.id]))
+
     counter = 0
 
     # main loop
