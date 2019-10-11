@@ -3,6 +3,11 @@ Laundry machine availability for Cinnamon College
 
 This is the code that lives on the Raspberry Pi
 
+Run this : 
+`python3 runner.py main.py main`
+
+TODO : document other setup needed
+
 ## Automatically update scripts!
 This is a small ecosystem to reload the code on the pi each time a new commit is
 made. It runs on 3 main components: flagger.py, runner.py and the main routine.
