@@ -1,4 +1,5 @@
 from adafruit_ads1x15.analog_in import AnalogIn
+import time
 
 class Pin:
     def __init__(self, id, adc, adc_pin, threshold = 32000):
@@ -18,6 +19,7 @@ class Pin:
         for i in range(20):
             if self.is_on_single():
                 return True
+            time.sleep(0.1)
         return False
 
     def __str__(self):
