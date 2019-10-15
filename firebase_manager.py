@@ -14,7 +14,8 @@ class FirebaseManager:
 
         self.pi_status = db.collection('pi_status')
         self.laundry_status = db.collection('laundry_status')
-
+        self.history = db.collection('laundry_history')
+    
     def init_pins(self, pins):
         for pin in pins:
             if not self.pin_exists(pin):
@@ -64,11 +65,14 @@ class FirebaseManager:
         })
 
     def update_pin_on(self, pin, on, datetime, certain):
-        FirebaseManager._update_doc(self.get_pin_doc(pin), {
+        data = {
             'on' : on,
             'timeChanged' : datetime,
             'timeChangedCertain' : certain
-        })
+        }
+        FirebaseManager._update_doc(self.get_pin_doc(pin), data)
+        data['pinNo'] = pin.id
+        self.history.add(data)
 
     def update_pi_last_seen(self, datetime):
         FirebaseManager._update_doc(self.get_pi_doc(),
