@@ -1,22 +1,18 @@
-import board
-import busio
-import adafruit_ads1x15.ads1115 as ADS
+import board # from Adafruit_Blinka
+import busio # from Adafruit_Blinka (?)
+import adafruit_ads1x15.ads1115 as ADS # from Adafruit_Python_ADS1x15
 import datetime as dt
 import time
+import logger
 
 from pin import Pin
-from firebase_manager import FirebaseManager
-from utils import sg_time_now
-from utils import to_py_time
-import flagger as fl
-
-from pi_id import PI_ID
+from firestore_manager import FirestoreManager
+from utils import sg_time_now, to_py_time, init_logger
+import flagger
+import config
 
 def get_pins(pi_id):
-    """
-    Returns the pins associated with each raspberry pi.
-    Update this when new pis/pins are added.
-    """
+    """Returns the pins associated with each RPi. Update this when new RPis/pins are added."""
     i2c = busio.I2C(board.SCL, board.SDA)
     ads1 = ADS.ADS1115(i2c, address=0x48)
     ads2 = ADS.ADS1115(i2c, address=0x49)
@@ -35,69 +31,60 @@ def get_pins(pi_id):
             Pin(9, ads3, ADS.P0)
         ]
 
-    raise ValueError('Invalid rapsberry pi id : ' + str(pi_id))
+    raise ValueError('invalid rapsberry pi id : ' + str(pi_id))
 
 def main():
+    init_logger(config.LOGDIR)
+    log = logging.getLogger()
 
-    firebase = FirebaseManager('./usc-laundry-test-firebase-adminsdk-0sph5-01054b85e5.json', PI_ID)
-    pins = get_pins(PI_ID)
-    flag = fl.Flag(fl.flag)
+    log.info('main script started.')
 
-    # create pins and pis in Firebase if they don't already exist
-    firebase.init_pins(pins)
-    firebase.init_pi()
+    firestore = FirestoreManager(config.FIRESTORE_CERT)
+    pins = get_pins(config.PI_ID)
+    flag = flagger.Flag(flagger.flag)
+
+    firestore.init_pins(map(pins, lambda p: p.id))
+    firestore.init_pi()
+
+    # Initial pin readings
+    # For washing machines, ignore lack of changes <= 30 min
+    # Can't do this for dryers since they can be paused
+    prev_on = {}
+    washer_ids = firestore.get_washing_machine_pin_ids()
+    for p in pins:
+        on = p.is_on()
+        prev_on[p.id] = on
+        current = firestore.get_pin_data(p.id)
+        now = sg_time_now()
+        if p.id in washer_ids and on == current['on'] and now - current['time'] <= dt.timedelta(minutes = 30):
+            continue
+        else:
+            firestore.update_pin(p.id, on, sg_time_now(), timeChangedCertain = False)
     
-    all_prev_on = {}
-    all_prev_time = {}
-    for pin in pins:
-        pin_data = firebase.read_pin(pin)
-        all_prev_on[pin.id] = pin_data['on']
-        all_prev_time[pin.id] = to_py_time(pin_data['timeChanged'])
-        #print(type(all_prev_time[pin.id]))
-       
-    counter = 0
+    seconds = 0
 
-    # main loop
     while True:
-        # updates roughly every 5 min (~30 iterations per min * 5)
-        if counter % 150 == 0:
-            firebase.update_pi_last_seen(sg_time_now())
-            counter = 0
-        counter += 1
+        # Update pi last seen at least every 10 minutes
+        if seconds == 600:
+            firestore.update_pi_last_seen()
+            seconds = 0
 
-        # stops the script if a new commit has been detected
-        if flag:
+        # Check if any pins have changed
+        for p in pins:
+            on = p.is_on()
+            if on != prev_on[p.id]:
+                firestore.update_pin(p.id, on, sg_time_now())
+                prev_on[p.id] = on
+                seconds = 0
+
+        # Check for updates from Github
+        if flag.flagged():
             flag.unflag()
-            print('Changes were detected. Restarting script...')
+            log.info('changes from github were detected. restarting main script.')
             break
 
-        for pin in pins:
-            on = pin.is_on()
-            now = sg_time_now()
-            #print(type(now))
-           
-            prev_on = all_prev_on[pin.id]
-            prev_time = all_prev_time[pin.id]
-
-            # in seconds. this is only true for washers and tapping once for dryers
-            cycle_length = dt.timedelta(minutes=45)
-
-            print(type(now), type(prev_time))
-            if (now - prev_time) > cycle_length and on:
-                # uh oh, we don't know when the cycle started
-                firebase.update_pin_on(pin, on=on, datetime=now, certain=False)
-                prev_on = on
-                prev_time = time
-            elif on != prev_on :
-                # update firestore on/off status and timing
-                firebase.update_pin_on(pin, on=on, datetime=now, certain=True)
-                prev_on = on
-                prev_time = now
-
-            all_prev_on[pin.id] = prev_on
-            all_prev_time[pin.id] = prev_time
-
         time.sleep(1)
+        seconds += 1
 
 if __name__ == '__main__':
     main()
