@@ -35,7 +35,7 @@ class FirestoreManager:
     def init_pi(self):
         """Create a firestore document for this RPi in the pi_status collection if it doesn't
         already exist."""
-        if not self._pi_doc.get().exists():
+        if not self._pi_doc.get().exists:
             self._pi_doc.set({'piNo' : self.pi_id})
             self.update_pi_last_seen()
             self._log.info("created piNo {} in firestore".format(self.pi_id))
@@ -49,7 +49,7 @@ class FirestoreManager:
         """
         for id in ids:
             doc = self._collections['current'].document(id)
-            if not doc.get().exists():
+            if not doc.get().exists:
                 doc.set({
                     'pinNo' : id,
                     'on' : False,
