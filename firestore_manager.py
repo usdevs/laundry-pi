@@ -56,7 +56,7 @@ class FirestoreManager:
                     'timeChanged' : sg_time_now(),
                     'timeChangedCertain': False,
                 })
-            self._log.info("created pin no {} in firestore".format(id))
+                self._log.info("created pin no {} in firestore".format(id))
 
     def update_pi_last_seen(self):
         """Update the lastSeen time for this RPi to the current time."""
