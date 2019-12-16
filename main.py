@@ -56,7 +56,7 @@ def main():
     pins = get_pins(config.PI_ID)
     flag = flagger.Flag(flagger.flag)
 
-    firestore.init_pins(map(pins, lambda p: p.id))
+    firestore.init_pins(map(lambda p: p.id, pins))
     firestore.init_pi()
 
     # Initial pin readings
