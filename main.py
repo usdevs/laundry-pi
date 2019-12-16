@@ -75,7 +75,7 @@ def main():
             continue
         else:
             firestore.update_pin(p.id, on, sg_time_now(), timeChangedCertain = False)
-            
+
     seconds = 0
 
     while True:
@@ -99,8 +99,8 @@ def main():
             break
 
         time.sleep(1)
-        seconds += 1
-        log.debug(seconds)
+        seconds += 25 # takes about 25 seconds to update 9 pins
+        log.debug("{} seconds".format(seconds))
 
 if __name__ == '__main__':
     main()
