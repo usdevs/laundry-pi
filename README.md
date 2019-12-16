@@ -6,7 +6,21 @@ This is the code that lives on the Raspberry Pi
 Run this : 
 `python3 runner.py main.py main`
 
-TODO : document other setup needed
+TODO : firestore structure and setup, clean up this README
+
+## Dependencies
+`pip install` :
+- firebase-admin
+- Adafruit-Blinka
+- Adafruit-ADS1x15
+
+## Additional Setup:
+`config.py`
+- Generate another firestore cert
+
+`crontab -e` then add:
+- `@reboot cd path/to/laundro && python3 runner.py main.py main` (on startup)
+- `* * * * * cd path/to/laundro && git pull && git log --pretty=oneline -1 | python3 flagger.py` (every 1 minute)
 
 ## Automatically update scripts!
 This is a small ecosystem to reload the code on the pi each time a new commit is
