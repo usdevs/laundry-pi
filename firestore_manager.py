@@ -26,7 +26,7 @@ class FirestoreManager:
             'pi' : db.collection('pi_status'),
             'history' : db.collection('laundry_status_history'),
             'current' : db.collection('laundry_status'),
-            'machines' : db.collection('machine_info'),
+            # 'machines' : db.collection('machine_info'),
         }
 
         self._pi_doc = self._collections['pi'].document(self.pi_id)
@@ -97,7 +97,7 @@ class FirestoreManager:
 
     def get_washing_machine_pin_ids(self):
         """Returns a list of pin IDs corresponding to washing machines."""
-        washers = self._collections['machines'].where('machineType','==','washer').stream()
+        washers = self._collections['current'].where('washer','==',True).stream()
         ids = list(map(washers, lambda w: int(w.to_dict()['pinNo'])))
         return ids
 
@@ -108,7 +108,8 @@ class FirestoreManager:
             id (int): Pin ID
         
         Returns:
-            Dict of pinNo (int), on (bool), timeChanged (datetime), timeChangedCertain (bool).
+            Dict of pinNo (int), on (bool), timeChanged (datetime), timeChangedCertain (bool),
+            plus whatever additional fields there are in firestore.
         """
         data = self._collections['current'].document(id).get().to_dict()
         data['timeChanged'] = to_py_time(data['timeChanged'])

@@ -1,5 +1,5 @@
-import board # from Adafruit_Blinka
-import busio # from Adafruit_Blinka (?)
+import board # from Adafruit-Blinka
+import busio # from Adafruit-Blinka
 import adafruit_ads1x15.ads1115 as ADS # from Adafruit_Python_ADS1x15
 import datetime as dt
 import time
@@ -60,8 +60,8 @@ def main():
     firestore.init_pi()
 
     # Initial pin readings
-    # For washing machines, ignore lack of changes <= 30 min
-    # Can't do this for dryers since they can be paused
+    # For washing machines, ignore lack of change within 30 min
+    # For dryers, ignore lack of change within 45 min
     prev_on = {}
     washer_ids = firestore.get_washing_machine_pin_ids()
     for p in pins:
@@ -69,11 +69,13 @@ def main():
         prev_on[p.id] = on
         current = firestore.get_pin_data(p.id)
         now = sg_time_now()
-        if p.id in washer_ids and on == current['on'] and now - current['time'] <= dt.timedelta(minutes = 30):
+        timediff = now - current['time']
+        if on == current['on'] and p.id in washer_ids and timediff <= dt.timedelta(minutes=30) or \
+           timediff <= dt.timedelta(minutes=45): 
             continue
         else:
             firestore.update_pin(p.id, on, sg_time_now(), timeChangedCertain = False)
-    
+            
     seconds = 0
 
     while True:
