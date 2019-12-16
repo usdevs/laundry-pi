@@ -97,11 +97,10 @@ class FirestoreManager:
 
     def get_washing_machine_pin_ids(self):
         """Returns a list of pin IDs corresponding to washing machines."""
-        washers = self._collections['current'].where('washer','==',True).stream()
+        washers = self._collections['current'].where('washer','==',True).get()
         ids = []
         for w in washers:
             ids.append(int(w.get('pinNo')))
-        #ids = list(map(washers, lambda w: int(w.to_dict()['pinNo'])))
         return ids
 
     def get_pin_data(self, id):
