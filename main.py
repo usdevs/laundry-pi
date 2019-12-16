@@ -37,11 +37,11 @@ def get_pins(pi_id):
             Pin(11, ads1, ADS.P1),
             Pin(12, ads1, ADS.P2),
             Pin(13, ads1, ADS.P3),
-            Pin(14, ads1, ADS.P0),
+            Pin(14, ads2, ADS.P0),
             Pin(15, ads2, ADS.P1),
             Pin(16, ads2, ADS.P2),
             Pin(17, ads2, ADS.P3),
-            Pin(18, ads2, ADS.P0),
+            Pin(18, ads3, ADS.P0),
         ]
 
     raise ValueError('invalid rapsberry pi id : ' + str(pi_id))
