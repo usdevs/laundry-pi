@@ -52,7 +52,7 @@ def main():
 
     log.info('main script started.')
 
-    firestore = FirestoreManager(config.FIRESTORE_CERT)
+    firestore = FirestoreManager(config.FIRESTORE_CERT, config.PI_ID)
     pins = get_pins(config.PI_ID)
     flag = flagger.Flag(flagger.flag)
 
@@ -79,7 +79,7 @@ def main():
     seconds = 0
 
     while True:
-        # Update pi last seen at least every 10 minutes
+        # Update pi last seen at least every 5 minutes
         if seconds == 600:
             firestore.update_pi_last_seen()
             seconds = 0

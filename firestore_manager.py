@@ -29,8 +29,8 @@ class FirestoreManager:
             # 'machines' : db.collection('machine_info'),
         }
 
-        self._pi_doc = self._collections['pi'].document(self.pi_id)
-        self._log = logging.logger()
+        self._pi_doc = self._collections['pi'].document(str(self.pi_id))
+        self._log = logging.getLogger()
 
     def init_pi(self):
         """Create a firestore document for this RPi in the pi_status collection if it doesn't
@@ -48,7 +48,7 @@ class FirestoreManager:
             ids (iterable of ints): Pin IDs
         """
         for id in ids:
-            doc = self._collections['current'].document(id)
+            doc = self._collections['current'].document(str(id))
             if not doc.get().exists:
                 doc.set({
                     'pinNo' : id,
@@ -76,21 +76,21 @@ class FirestoreManager:
                 of the script. Defaults to True.
         """
         if type(id) != int:
-            raise TypeError('id should be an int')
+            raise TypeError('id is {}, which is a {}. It should be an int.'.format(id,type(id)))
         if type(on) != bool:
-            raise TypeError('on should be a bool')
+            raise TypeError('on is {}, which is a {}. It should be a bool.'.format(on,type(on)))
         if type(timeChanged) != dt.datetime:
-            raise TypeError('timeChanged should be a datetime')
+            raise TypeError('timeChanged is {}, which is a {}. It should be a datetime.'.format(timeChanged,type(timeChanged)))
         if type(timeChangedCertain) != bool:
-            raise TypeError('timeChangedCertain should be a bool')
+            raise TypeError('timeChangedCertain is {}, which is a {}. It should be a bool'.format(timeChangedCertain, type(timeChangedCertain)))
 
         data = {
             'pinNo' : id,
             'on' : on,
-            'timeChanged' : time,
+            'timeChanged' : timeChanged,
             'timeChangedCertain' : timeChangedCertain,
         }
-        self._collections['current'].document(id).update(data)
+        self._collections['current'].document(str(id)).update(data)
         self._collections['history'].add(data)
 
         self.update_pi_last_seen()
@@ -98,7 +98,10 @@ class FirestoreManager:
     def get_washing_machine_pin_ids(self):
         """Returns a list of pin IDs corresponding to washing machines."""
         washers = self._collections['current'].where('washer','==',True).stream()
-        ids = list(map(washers, lambda w: int(w.to_dict()['pinNo'])))
+        ids = []
+        for w in washers:
+            ids.append(int(w.get('pinNo')))
+        #ids = list(map(washers, lambda w: int(w.to_dict()['pinNo'])))
         return ids
 
     def get_pin_data(self, id):
@@ -111,7 +114,7 @@ class FirestoreManager:
             Dict of pinNo (int), on (bool), timeChanged (datetime), timeChangedCertain (bool),
             plus whatever additional fields there are in firestore.
         """
-        data = self._collections['current'].document(id).get().to_dict()
+        data = self._collections['current'].document(str(id)).get().to_dict()
         data['timeChanged'] = to_py_time(data['timeChanged'])
         return data
 

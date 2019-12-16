@@ -3,4 +3,4 @@ FIRESTORE_CERT = "./usc-laundry-test-firebase-adminsdk-0sph5-01054b85e5.json"
 # Identifies the current device to determine what pins to update. See get_pins(id) in main.py
 PI_ID = 1
 
-LOGDIR = "../logs"
+LOGDIR = ""
