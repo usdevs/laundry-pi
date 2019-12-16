@@ -69,7 +69,7 @@ def main():
         prev_on[p.id] = on
         current = firestore.get_pin_data(p.id)
         now = sg_time_now()
-        timediff = now - current['time']
+        timediff = now - current['timeChanged']
         if on == current['on'] and p.id in washer_ids and timediff <= dt.timedelta(minutes=30) or \
            timediff <= dt.timedelta(minutes=45): 
             continue
