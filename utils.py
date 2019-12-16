@@ -41,10 +41,10 @@ def init_logger(logdir="", logger_name=None):
     all.setFormatter(fmt)
     log.addHandler(all)
 
-    errors = logging.FileHandler(os.path.join(logdir, 'errors.log'))
-    errors.setLevel(logging.ERROR)
-    errors.setFormatter(fmt)
-    log.addHandler(errors)
+    info = logging.FileHandler(os.path.join(logdir, 'info.log'))
+    info.setLevel(logging.INFO)
+    info.setFormatter(fmt)
+    log.addHandler(info)
 
     # Log any uncaught exceptions
     old_excepthook = sys.excepthook # prints to console
