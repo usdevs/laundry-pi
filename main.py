@@ -100,6 +100,7 @@ def main():
 
         time.sleep(1)
         seconds += 1
+        log.debug(seconds)
 
 if __name__ == '__main__':
     main()
