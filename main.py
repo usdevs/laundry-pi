@@ -3,7 +3,7 @@ import busio # from Adafruit-Blinka
 import adafruit_ads1x15.ads1115 as ADS # from Adafruit_Python_ADS1x15
 import datetime as dt
 import time
-import logger
+import logging
 
 from pin import Pin
 from firestore_manager import FirestoreManager
