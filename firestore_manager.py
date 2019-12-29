@@ -55,6 +55,7 @@ class FirestoreManager:
                     'on' : False,
                     'timeChanged' : sg_time_now(),
                     'timeChangedCertain': False,
+                    'piNo' : self.pi_id,
                 })
                 self._log.info("created pin no {} in firestore".format(id))
 
@@ -89,6 +90,7 @@ class FirestoreManager:
             'on' : on,
             'timeChanged' : timeChanged,
             'timeChangedCertain' : timeChangedCertain,
+            'piNo' : self.pi_id,
         }
         self._collections['current'].document(str(id)).update(data)
         self._collections['history'].add(data)
