@@ -24,11 +24,11 @@ class Pin:
         """Checks if this pin is currently on, based on 1 reading. This may return off if the pin is blinking.
 
         Returns:
-            True if this pin is currently on, False otherwise.
+            A tuple of whether the pin is on (bool) and the light value reading (int).
         """
         light_value = AnalogIn(self.adc, self.adc_pin).value
 #        print(str(self), light_value)
-        return light_value < self.threshold
+        return light_value < self.threshold, light_value
     
     def is_on(self):
         """Checks whether this pin is on, which includes blinking.
@@ -38,15 +38,19 @@ class Pin:
             The pin will appear off if it is disconnected.
         """
         log = logging.getLogger()
+        values = []
         for i in range(20):
-            if self.is_on_single():
-                log.debug("{} is on".format(self))
+            on, val = self.is_on_single()
+            values.append(val)
+            if on:
+                log.debug("{} is on. Values:{}".format(self, values))
                 return True
             time.sleep(0.1)
-        log.debug("{} is off".format(self))
+
+        log.debug("{} is off. Values:{}".format(self, values))
         return False
 
     def __str__(self):
-        return 'Pin ' + str(self.id)
+        return "Pin {} (threshold={})".format(self.id, self.threshold)
 
     __repr__ = __str__
