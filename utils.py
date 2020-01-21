@@ -18,8 +18,8 @@ def to_py_time(googletime):
 
 ## Logging
 def init_logger(logdir="", logger_name=None):
-    """Configures logger to log all DEBUG and above logs to the file all.log and to log all ERROR and
-    above to errors.log. Also configures logger to log any uncaught exceptions (in addition to
+    """Configures logger to log all DEBUG and above logs to the file all.log and to log all INFO and
+    above to info.log. Also configures logger to log any uncaught exceptions (in addition to
     printing them to the console).
 
     Args:
