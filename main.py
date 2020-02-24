@@ -102,5 +102,33 @@ def main():
         seconds += 25 # takes about 25 seconds to update 9 pins
         log.debug("{} seconds".format(seconds))
 
+def local_main():
+    """For debugging. Checks pins without updating firestore."""
+    init_logger(config.LOGDIR)
+    log = logging.getLogger()
+
+    log.info('main script started.')
+
+    pins = get_pins(config.PI_ID)
+    flag = flagger.Flag(flagger.flag)
+
+
+    while True:
+        # Check if any pins have changed
+        for p in pins:
+            p.is_on()
+
+        # Check for updates from Github
+        if flag.flagged():
+            flag.unflag()
+            log.info('changes from github were detected. restarting main script.')
+            break
+
+        time.sleep(1)
+
 if __name__ == '__main__':
-    main()
+    # Run local_main
+    try:
+        main()
+    except:
+        local_main()
