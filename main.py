@@ -107,7 +107,7 @@ def local_main():
     init_logger(config.LOGDIR)
     log = logging.getLogger()
 
-    log.info('main script started.')
+    log.info('local_main script started instead, instead of main.')
 
     pins = get_pins(config.PI_ID)
     flag = flagger.Flag(flagger.flag)
