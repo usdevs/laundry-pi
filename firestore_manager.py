@@ -45,13 +45,13 @@ class FirestoreManager:
         already exist.
 
         Args:
-            ids (iterable of ints): Pin IDs
+            ids (iterable of strings): Pin IDs
         """
         for id in ids:
-            doc = self._collections['current'].document(str(id))
+            doc = self._collections['current'].document(id)
             if not doc.get().exists:
                 doc.set({
-                    'pinNo' : id,
+                    'pinId' : id,
                     'on' : False,
                     'timeChanged' : sg_time_now(),
                     'timeChangedCertain': False,
@@ -70,14 +70,14 @@ class FirestoreManager:
         pin status changes.
 
         Args:
-            id (int): Pin ID.
+            id (string): Pin ID.
             on (bool): Whether the pin is on.
             timeChanged (datetime): Time of change/reading.
             timeChangedCertain (bool, optional): This should only be False for readings upon startup
                 of the script. Defaults to True.
         """
-        if type(id) != int:
-            raise TypeError('id is {}, which is a {}. It should be an int.'.format(id,type(id)))
+        if type(id) != str:
+            raise TypeError('id is {}, which is a {}. It should be an str.'.format(id,type(id)))
         if type(on) != bool:
             raise TypeError('on is {}, which is a {}. It should be a bool.'.format(on,type(on)))
         if type(timeChanged) != dt.datetime:
@@ -86,13 +86,13 @@ class FirestoreManager:
             raise TypeError('timeChangedCertain is {}, which is a {}. It should be a bool'.format(timeChangedCertain, type(timeChangedCertain)))
 
         data = {
-            'pinNo' : id,
+            'pinId' : id,
             'on' : on,
             'timeChanged' : timeChanged,
             'timeChangedCertain' : timeChangedCertain,
             'piNo' : self.pi_id,
         }
-        self._collections['current'].document(str(id)).update(data)
+        self._collections['current'].document(id).update(data)
         self._collections['history'].add(data)
 
         self.update_pi_last_seen()
@@ -102,20 +102,23 @@ class FirestoreManager:
         washers = self._collections['current'].where('washer','==',True).get()
         ids = []
         for w in washers:
-            ids.append(int(w.get('pinNo')))
+            ids.append(w.get('pinId'))
         return ids
 
     def get_pin_data(self, id):
-        """Returns current pin status in a dict containing the pinNo, on, time, timeChangedCertain.
+        """Returns current pin status in a dict containing the pinId, on, time, timeChangedCertain.
 
         Args:
-            id (int): Pin ID
+            id (string): Pin ID
         
         Returns:
-            Dict of pinNo (int), on (bool), timeChanged (datetime), timeChangedCertain (bool),
+            Dict of pinId (string), on (bool), timeChanged (datetime), timeChangedCertain (bool),
             plus whatever additional fields there are in firestore.
         """
-        data = self._collections['current'].document(str(id)).get().to_dict()
+        if type(id) != str:
+            raise TypeError('id is {}, which is a {}. It should be an str.'.format(id,type(id)))
+
+        data = self._collections['current'].document(id).get().to_dict()
         data['timeChanged'] = to_py_time(data['timeChanged'])
         return data
 

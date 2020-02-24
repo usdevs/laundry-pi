@@ -110,8 +110,7 @@ the future), namely:
 This keeps track of the current status for each washer/dryer. The document ID is
 unique to each washer/dryer in Cinnamon. Each document has the following fields:
 
-1. *pinNo (number): unique number to identify each laundry machine in Cinnamon.
-_I might change this to a more descriptive string in the future (eg. lvl17-1)_
+1. *pinId (string): unique string to identify each laundry machine in Cinnamon.
 2. *piNo (number): the RPi this laundry machine's sensor is connected to.
 3. *on (boolean): is the laundry machine on?
 4. *timeChanged (timestamp): when the laundry machine changed from on->off or

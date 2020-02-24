@@ -6,7 +6,7 @@ class Pin:
     def __init__(self, id, adc, adc_pin, threshold = 32000):
         """
         Args:
-            id (int): Unique ID to every pin (should be unique across RPis too)
+            id (string): Unique ID to every pin (should be unique across RPis too)
             adc (adafruit_ads1x15.ads1115.ADS.ADS1115): Represents one ADC module.
             adc_pin (adafruit_ads1x15.ads1115.ADS.P0/1/2/3): Represents a pin on the ADC module.
             threshold (int, optional): Light threshold. The pin is on if the light value is below
@@ -15,6 +15,11 @@ class Pin:
         Returns:
             A new Pin.
         """
+        if type(id) != str:
+            raise TypeError('id is {}, which is a {}. It should be an str.'.format(id,type(id)))
+        if type(threshold) != int and type(threshold) != float:
+            raise TypeError('threshold is {}, which is a {}. It should be a number.'.format(id,type(id)))
+
         self.id = id
         self.adc = adc
         self.adc_pin = adc_pin

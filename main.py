@@ -20,28 +20,28 @@ def get_pins(pi_id):
 
     if pi_id == 1:
         return [
-            Pin(1, ads1, ADS.P0),
-            Pin(2, ads1, ADS.P1),
-            Pin(3, ads1, ADS.P2),
-            Pin(4, ads1, ADS.P3),
-            Pin(5, ads2, ADS.P0),
-            Pin(6, ads2, ADS.P1),
-            Pin(7, ads2, ADS.P2),
-            Pin(8, ads2, ADS.P3),
-            Pin(9, ads3, ADS.P0)
+            Pin("pi1-1", ads1, ADS.P0),
+            Pin("pi1-2", ads1, ADS.P1),
+            Pin("pi1-3", ads1, ADS.P2),
+            Pin("pi1-4", ads1, ADS.P3),
+            Pin("pi1-5", ads2, ADS.P0),
+            Pin("pi1-6", ads2, ADS.P1),
+            Pin("pi1-7", ads2, ADS.P2),
+            Pin("pi1-8", ads2, ADS.P3),
+            Pin("pi1-9", ads3, ADS.P0)
         ]
 
     elif pi_id == 2:
         return [
-            Pin(10, ads1, ADS.P0),
-            Pin(11, ads1, ADS.P1),
-            Pin(12, ads1, ADS.P2),
-            Pin(13, ads1, ADS.P3, threshold = 16000),
-            Pin(14, ads2, ADS.P0),
-            Pin(15, ads2, ADS.P1),
-            Pin(16, ads2, ADS.P2),
-            Pin(17, ads2, ADS.P3),
-            Pin(18, ads3, ADS.P0),
+            Pin("pi2-1", ads1, ADS.P0),
+            Pin("pi2-2", ads1, ADS.P1),
+            Pin("pi2-3", ads1, ADS.P2),
+            Pin("pi2-4", ads1, ADS.P3, threshold = 16000),
+            Pin("pi2-5", ads2, ADS.P0),
+            Pin("pi2-6", ads2, ADS.P1),
+            Pin("pi2-7", ads2, ADS.P2),
+            Pin("pi2-8", ads2, ADS.P3),
+            Pin("pi2-9", ads3, ADS.P0)
         ]
 
     raise ValueError('invalid rapsberry pi id : ' + str(pi_id))
