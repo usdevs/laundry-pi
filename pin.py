@@ -23,7 +23,7 @@ class Pin:
             raise TypeError('id is {}, which is a {}. It should be an int.'.format(id,type(id)))
         if type(threshold) != int and type(threshold) != float:
             raise TypeError('threshold is {}, which is a {}. It should be a number.'.format(id,type(id)))
-        if type(record_valeus) != bool:
+        if type(record_values) != bool:
             raise TypeError('record_values is {}, which is a {}. It should be a bool.'.format(id,type(id)))
 
         self.id = id
